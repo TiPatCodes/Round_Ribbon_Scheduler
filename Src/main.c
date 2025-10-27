@@ -23,10 +23,14 @@
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
+
+void enable_processor_faults(void);
+
+
 int main(void)
 {
     /* Loop forever */
-//	enable_processor_faults();
+	enable_processor_faults();
 
 //	init_scheduler_stack(SCHED_STACK_START);
 
@@ -42,3 +46,17 @@ int main(void)
 
 	for(;;);
 }
+
+
+void enable_processor_faults ()
+{
+	uint32_t * pSHCSR =  (uint32_t*) (0xE000ED00  +  0x24);
+
+	*pSHCSR |= ( 1U << 16);  // Memory fault activation
+	*pSHCSR |= ( 1U << 17); // Bus fault activation
+	*pSHCSR |= ( 1U << 18); // Usage fault activation
+
+}
+
+
+
