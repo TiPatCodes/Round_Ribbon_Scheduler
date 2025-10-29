@@ -24,7 +24,15 @@
 #endif
 
 
+uint32_t tasks_PSPValue[MAX_TASKS];
+uint32_t tasks_HandlerArray[MAX_TASKS];
+
+
+
+
 void enable_processor_faults(void);
+__attribute__((naked))  void init_scheduler_stack(uint32_t  top_scheduler_stck);
+void init_tasks_stack(void);
 
 
 int main(void)
@@ -32,9 +40,9 @@ int main(void)
     /* Loop forever */
 	enable_processor_faults();
 
-//	init_scheduler_stack(SCHED_STACK_START);
+	init_scheduler_stack(SCHED_STACK_START);
 
-//	init_tasks_stack();
+	init_tasks_stack();
 
 //	led_init_all();
 
@@ -42,7 +50,7 @@ int main(void)
 
 //	switch_sp_to_psp();
 
-//	task1_handler();
+	task1_handler();
 
 	for(;;);
 }
@@ -51,12 +59,76 @@ int main(void)
 void enable_processor_faults ()
 {
 	uint32_t * pSHCSR =  (uint32_t*) (0xE000ED00  +  0x24);
-
 	*pSHCSR |= ( 1U << 16);  // Memory fault activation
 	*pSHCSR |= ( 1U << 17); // Bus fault activation
 	*pSHCSR |= ( 1U << 18); // Usage fault activation
+}
+
+__attribute__((naked))  void init_scheduler_stack(uint32_t  top_scheduler_stck)
+{
+
+	__asm volatile ("MSR MSP.%0": :"r"(top_scheduler_stck) : );  // as we are moving value to a special register and not the general register like R0 to R12
+	__asm volatile ("BX LR");  // Return from function call
+	// we use BL funC  -- for Branch with link  (Call)  to function  funC, return address stored in LR
+
+ }
+
+void init_tasks_stack(void)
+
+{
+	//create a local pointer  to  pointing to  the PSP of each task
+	uint32_t *pSP;
+
+	// then assigned the value of  each task's PSP value there respective addresses
+	tasks_PSPValue[0] = IDLE_STACK_START;
+	tasks_PSPValue[1] = T1_STACK_START;
+	tasks_PSPValue[2] = T2_STACK_START;
+	tasks_PSPValue[3] = T3_STACK_START;
+	tasks_PSPValue[4] = T4_STACK_START;
+
+	tasks_HandlerArray[0] = idletask_handler();
+	tasks_HandlerArray[1] = task1_handler();
+	tasks_HandlerArray[2] = task2_handler();
+	tasks_HandlerArray[3] = task3_handler();
+	tasks_HandlerArray[4] = task4_handler();
+
+
+
+	// also assigned for each task the initial value of PSR , PC and LR , R12, R3 , R2, R1, R0 by decrementing the PSP pointer
+	for ( int i = 0;  i< MAX_TASKS ; i++)
+	{
+		pSP =  (uint32_t*)tasks_PSPValue[i];
+
+		// the first register is PSR
+		*pSP =  DUMMY_XPSR;
+
+		// the second is the PC
+		pSP --;
+		*pSP = tasks_HandlerArray[i];
+
+
+
+
+	}
+   // assigned the rest of the registers R11, R10 -- R4 i.e rest eight
 
 }
 
 
 
+
+void idletask_handler(void){
+
+}
+void task1_handler(void){
+
+}
+void task2_handler(void){
+
+}
+void task3_handler(void){
+
+}
+void task4_handler(void){
+
+}

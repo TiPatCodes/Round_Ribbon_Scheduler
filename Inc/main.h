@@ -39,4 +39,11 @@
 #define TASK_BLOCKED_STATE  0XFF
 
 
+void idletask_handler(void);
+void task1_handler(void);
+void task2_handler(void);
+void task3_handler(void);
+void task4_handler(void);
+
+
 #endif /* MAIN_H_ */
