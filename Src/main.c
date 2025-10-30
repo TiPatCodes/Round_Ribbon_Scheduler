@@ -24,16 +24,31 @@
 #endif
 
 
-uint32_t tasks_PSPValue[MAX_TASKS];
-uint32_t tasks_HandlerArray[MAX_TASKS];
+
+void idletask_handler(void);
+void task1_handler(void);
+void task2_handler(void);
+void task3_handler(void);
+void task4_handler(void);
 
 
+typedef  struct {
+	uint32_t  pPSPValue ;
+	void (*taskHandler)( void);
+	uint8_t taskState;
+	uint32_t block_count;
 
+}uHandle_Task;
+
+uHandle_Task user_Tasks[MAX_TASKS] ;
 
 void enable_processor_faults(void);
 __attribute__((naked))  void init_scheduler_stack(uint32_t  top_scheduler_stck);
 void init_tasks_stack(void);
+void init_systick_timer(uint32_t TickCounter);
 
+uint8_t Current_task = 1;
+uint32_t gSysTick_Counter = 0;
 
 int main(void)
 {
@@ -46,7 +61,7 @@ int main(void)
 
 //	led_init_all();
 
-//	init_systick_timer(TICK_HZ);
+	init_systick_timer(TICK_HZ);
 
 //	switch_sp_to_psp();
 
@@ -67,68 +82,112 @@ void enable_processor_faults ()
 __attribute__((naked))  void init_scheduler_stack(uint32_t  top_scheduler_stck)
 {
 
-	__asm volatile ("MSR MSP.%0": :"r"(top_scheduler_stck) : );  // as we are moving value to a special register and not the general register like R0 to R12
+	__asm volatile ("MSR MSP , %0" :  :"r" (top_scheduler_stck) : );  // as we are moving value to a special register and not the general register like R0 to R12
 	__asm volatile ("BX LR");  // Return from function call
 	// we use BL funC  -- for Branch with link  (Call)  to function  funC, return address stored in LR
 
  }
 
-void init_tasks_stack(void)
-
+void init_tasks_stack()
 {
 	//create a local pointer  to  pointing to  the PSP of each task
 	uint32_t *pSP;
 
 	// then assigned the value of  each task's PSP value there respective addresses
-	tasks_PSPValue[0] = IDLE_STACK_START;
-	tasks_PSPValue[1] = T1_STACK_START;
-	tasks_PSPValue[2] = T2_STACK_START;
-	tasks_PSPValue[3] = T3_STACK_START;
-	tasks_PSPValue[4] = T4_STACK_START;
+	user_Tasks[0].pPSPValue =  IDLE_STACK_START ;
+	user_Tasks[1].pPSPValue  = T1_STACK_START ;
+	user_Tasks[2].pPSPValue  = T2_STACK_START ;
+	user_Tasks[3].pPSPValue = T3_STACK_START;
+	user_Tasks[4].pPSPValue  = T4_STACK_START;
 
-	tasks_HandlerArray[0] = idletask_handler();
-	tasks_HandlerArray[1] = task1_handler();
-	tasks_HandlerArray[2] = task2_handler();
-	tasks_HandlerArray[3] = task3_handler();
-	tasks_HandlerArray[4] = task4_handler();
+	user_Tasks[0].taskHandler = idletask_handler;
+	user_Tasks[1].taskHandler = task1_handler;
+	user_Tasks[2].taskHandler = task2_handler;
+	user_Tasks[3].taskHandler = task3_handler;
+	user_Tasks[4].taskHandler = task4_handler;
+
+	user_Tasks[0].taskState =  TASK_READY_STATE;
+	user_Tasks[1].taskState =  TASK_READY_STATE;
+	user_Tasks[2].taskState =  TASK_READY_STATE;
+	user_Tasks[3].taskState =  TASK_READY_STATE;
+	user_Tasks[4].taskState =  TASK_READY_STATE;
 
 
 
 	// also assigned for each task the initial value of PSR , PC and LR , R12, R3 , R2, R1, R0 by decrementing the PSP pointer
 	for ( int i = 0;  i< MAX_TASKS ; i++)
 	{
-		pSP =  (uint32_t*)tasks_PSPValue[i];
+		pSP =  (uint32_t*)(user_Tasks[i].pPSPValue) ;
 
 		// the first register is PSR
 		*pSP =  DUMMY_XPSR;
 
-		// the second is the PC
-		pSP --;
-		*pSP = tasks_HandlerArray[i];
+		// the second is the PC  as the processor is suppose to return back to task handler after the interrupt
+		pSP -- ;
+		*pSP = (uint32_t) user_Tasks[i].taskHandler;
 
+		// the third is the LR
+		pSP -- ;
+		*pSP = 0xFFFFFFFD ;
 
+		for (int j = 0 ; j < 13 ; j++) // the rest of  13 register value is initialized to zero
+		{
+			pSP -- ;
+			*pSP = 0 ;
+		}
 
-
+		user_Tasks[i].pPSPValue =  (uint32_t)pSP;
 	}
-   // assigned the rest of the registers R11, R10 -- R4 i.e rest eight
-
 }
 
+void init_systick_timer(uint32_t TickCounter)
+{
+	uint32_t cntValue  = (  (SYSTICK_TIM_CLK / TickCounter) - 1);
 
+	uint32_t* pSTK_CTRL  =  (uint32_t*) 0xE000E010;
+	uint32_t* pSTK_LOAD =  (uint32_t*) 0xE000E014;
+
+	//we need to load the value of counter into STK_LOAD register from bit[23:0]
+
+	uint32_t* pSTK_LOAD &= ~(0x00FFFFFFFF) ;
+
+	uint32_t* pSTK_LOAD |= cntValue;
+
+	// now we need to enable the bit of STK_CTRL
+
+	//
+
+
+}
 
 
 void idletask_handler(void){
 
+	while(1){
+
+	}
 }
 void task1_handler(void){
+	while(1){
+
+	}
 
 }
 void task2_handler(void){
+	while(1){
+
+	}
 
 }
 void task3_handler(void){
+	while(1){
+
+	}
 
 }
 void task4_handler(void){
+	while(1){
+
+	}
 
 }
