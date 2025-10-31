@@ -30,7 +30,8 @@ void task1_handler(void);
 void task2_handler(void);
 void task3_handler(void);
 void task4_handler(void);
-
+uint32_t getPSP_Value_fromTask( uint8_t Current_TskNumber);
+void  savePSP_Value_toTask( uint8_t Current_TskNumber , uint32_t pspValue );
 
 typedef  struct {
 	uint32_t  pPSPValue ;
@@ -46,6 +47,7 @@ void enable_processor_faults(void);
 __attribute__((naked))  void init_scheduler_stack(uint32_t  top_scheduler_stck);
 void init_tasks_stack(void);
 void init_systick_timer(uint32_t TickCounter);
+__attribute__((naked)) switch_sp_to_psp();
 
 uint8_t Current_task = 1;
 uint32_t gSysTick_Counter = 0;
@@ -63,7 +65,7 @@ int main(void)
 
 	init_systick_timer(TICK_HZ);
 
-//	switch_sp_to_psp();
+	switch_sp_to_psp();
 
 	task1_handler();
 
@@ -149,16 +151,55 @@ void init_systick_timer(uint32_t TickCounter)
 
 	//we need to load the value of counter into STK_LOAD register from bit[23:0]
 
-	uint32_t* pSTK_LOAD &= ~(0x00FFFFFFFF) ;
+	*pSTK_LOAD &= ~(0x00FFFFFFFF) ;
 
-	uint32_t* pSTK_LOAD |= cntValue;
+	*pSTK_LOAD |= cntValue;
 
 	// now we need to enable the bit of STK_CTRL
+	*pSTK_CTRL |=  (uint32_t)( 1  << 1U);
+	*pSTK_CTRL |=  (uint32_t)( 1  << 2U);
+	*pSTK_CTRL |=  (uint32_t)( 1  << 0U);
 
-	//
+	// you can pend the pendSV hear
+
+
+
+	// or can directly do the context switching
+
 
 
 }
+
+__attribute__((naked)) switch_sp_to_psp()
+{
+	// we need to push LR hear
+	__asm volatile ("PUSH {LR}"); // we are using this because inside this function we are going to branch to other function to get the PSP value , so the original value of LR is going to modify
+
+	// get the PSP value in the RO
+//	__asm volatile ("BL get_psp_value(")
+
+
+	// store the PSP  value  in SP register of core
+
+
+	// change the SP type to PSP from MSP
+
+
+	__asm volatile("POP {LR}");
+
+}
+
+
+uint32_t getPSP_Value_fromTask( uint8_t Current_TskNumber){
+
+
+}
+
+void  savePSP_Value_toTask( uint8_t Current_TskNumber , uint32_t pspValue ){
+
+
+}
+
 
 
 void idletask_handler(void){
