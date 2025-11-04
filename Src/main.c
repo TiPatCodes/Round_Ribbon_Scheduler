@@ -24,18 +24,21 @@
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
-void idletask_handler(void);
+//void  idle(void);
 void task1_handler(void);
 void task2_handler(void);
 void task3_handler(void);
 void task4_handler(void);
+
+
+
 uint32_t getPSP_Value_fromTask( void);
 void  savePSP_Value_toTask(uint32_t pspValue );
 
 typedef  struct {
 	uint32_t  pPSPValue ;
-	uint8_t taskState;
 	uint32_t block_count;
+	uint8_t taskState;
 	void (*taskHandler)( void);
 }uHandle_Task;
 
@@ -72,6 +75,45 @@ int main(void)
 	for(;;);
 }
 
+void idle(void)
+{
+	while(1)
+	{
+
+	}
+}
+void task1_handler(void)
+{
+	while(1)
+	{
+		printf("TASK 1\n ");
+	}
+}
+
+void task2_handler(void)
+{
+	while(1)
+	{
+		printf("TASK 2 \n ");
+	}
+}
+
+void task3_handler(void)
+{
+	while(1)
+	{
+		printf("TASK 3 \n");
+	}
+}
+
+void task4_handler(void)
+{
+	while(1)
+	{
+		printf(" TASK 4 \n");
+	}
+}
+
 
 void enable_processor_faults (void)
 {
@@ -102,7 +144,7 @@ void init_tasks_stack(void)
 	user_Tasks[3].pPSPValue = T3_STACK_START;
 	user_Tasks[4].pPSPValue  = T4_STACK_START;
 
-	user_Tasks[0].taskHandler = idletask_handler;
+	user_Tasks[0].taskHandler = idle;
 	user_Tasks[1].taskHandler = task1_handler;
 	user_Tasks[2].taskHandler = task2_handler;
 	user_Tasks[3].taskHandler = task3_handler;
@@ -117,7 +159,7 @@ void init_tasks_stack(void)
 
 
 	// also assigned for each task the initial value of PSR , PC and LR , R12, R3 , R2, R1, R0 by decrementing the PSP pointer
-	for ( int i = 0;  i< MAX_TASKS ; i++)
+	for ( int i = 1;  i< MAX_TASKS ; i++)
 	{
 		pSP =  (uint32_t*)(user_Tasks[i].pPSPValue) ;
 
@@ -187,7 +229,6 @@ __attribute__((naked)) void switch_sp_to_psp(void)
 
 
 uint32_t getPSP_Value_fromTask(void){
-
 	return user_Tasks[Current_task].pPSPValue;
 }
 
@@ -197,26 +238,31 @@ void  savePSP_Value_toTask(uint32_t pspValue ){
 
 
 void update_next_task (void){
-	int state = TASK_BLOCKED_STATE;
+//	int state = TASK_BLOCKED_STATE;
+//
+//	for(int i= 0 ; i < (MAX_TASKS) ; i++)
+//	{
+//		Current_task++;
+////		Current_task = Current_task  % (MAX_TASKS);
+//		if ( Current_task >= MAX_TASKS) Current_task = 1;
+//		state = user_Tasks[Current_task].taskState;
+//		if( (state == TASK_READY_STATE) && (Current_task != 0) )
+//			break;
+//	}
+//
+//	if(state != TASK_READY_STATE)
+//		Current_task = 0;
 
-	for(int i= 0 ; i < (MAX_TASKS) ; i++)
-	{
-		Current_task++;
-		Current_task = Current_task % MAX_TASKS;
-		state = user_Tasks[Current_task].taskState;
-		if( (state == TASK_READY_STATE) && (Current_task != 0) )
-			break;
-	}
-
-	if(state != TASK_READY_STATE)
-		Current_task = 0;
+	Current_task++;
+	//		Current_task = Current_task  % (MAX_TASKS);
+	if ( Current_task >= MAX_TASKS) Current_task = 1;
 }
 
 // implementing the Systick handler
 void SysTick_Handler (void){
-	gSysTick_Counter++ ;
+    //	gSysTick_Counter++ ;
 
-	//	/*Save the context of current task */
+    /*Save the context of current task */
 	//1. Get current running task's PSP value
 	__asm volatile("MRS R0,PSP");
 	//2. Using that PSP value store SF2( R4 to R11)
@@ -228,9 +274,8 @@ void SysTick_Handler (void){
     __asm volatile("BL savePSP_Value_toTask");
 
 	/*Retrieve the context of next task */
-
 	//1. Decide next task to run
-    __asm volatile("BL update_next_task");
+    __asm volatile("BL  update_next_task");
 
 	//2. get its past PSP value
 	__asm volatile ("BL getPSP_Value_fromTask");
@@ -251,45 +296,41 @@ void SysTick_Handler (void){
 //2. implement the fault handlers
 void HardFault_Handler(void)
 {
-	printf("Exception : Hardfault\n");
-	while(1);
+	printf(" Hard fault occurred \n");
+	while (1)
+	{
+
+	}
 }
 
 void MemManage_Handler(void)
 {
-	printf("Exception : MemManage\n");
-	while(1);
+	printf(" Mem manage fault occurred \n");
+	while (1)
+	{
+
+	}
 }
 
 void BusFault_Handler(void)
 {
-	printf("Exception : BusFault\n");
-	while(1);
-}
+	printf(" Bus hard  fault occurred \n");
+	while (1)
+	{
 
-void idletask_handler(void){
-	while(1){
-		printf("IDLE \n");
-	}
-}
-void task1_handler(void){
-	while(1){
-		printf("TASK 1 \n");
 	}
 }
 
-void task2_handler(void){
-	while(1){
-	printf("TASK 2 \n");
-	}
-}
-void task3_handler(void){
-	while(1){
-	printf("TASK 3 \n");
-	}
-}
-void task4_handler(void){
-	while(1){
-	printf("TASK 4 \n");
-	}
-}
+
+
+
+
+
+
+
+
+
+
+
+
+

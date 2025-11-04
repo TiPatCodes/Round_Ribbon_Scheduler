@@ -10,7 +10,7 @@
 
 #define TICK_HZ  1000U
 
-#define MAX_TASKS   5
+#define MAX_TASKS   3
 
 /* some stack memory calculations */
 #define SIZE_TASK_STACK          1024U
