@@ -17,21 +17,20 @@
  */
 
 #include <stdint.h>
+#include <stdio.h>
 #include "main.h"
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
   #warning "FPU is not initialized, but the project is compiling for an FPU. Please initialize the FPU before use."
 #endif
 
-
-
 void idletask_handler(void);
 void task1_handler(void);
 void task2_handler(void);
 void task3_handler(void);
 void task4_handler(void);
-uint32_t getPSP_Value_fromTask( uint8_t Current_TskNumber);
-void  savePSP_Value_toTask( uint8_t Current_TskNumber , uint32_t pspValue );
+uint32_t getPSP_Value_fromTask( void);
+void  savePSP_Value_toTask(uint32_t pspValue );
 
 typedef  struct {
 	uint32_t  pPSPValue ;
@@ -47,7 +46,7 @@ void enable_processor_faults(void);
 __attribute__((naked))  void init_scheduler_stack(uint32_t  top_scheduler_stck);
 void init_tasks_stack(void);
 void init_systick_timer(uint32_t TickCounter);
-__attribute__((naked)) switch_sp_to_psp();
+__attribute__((naked)) void switch_sp_to_psp(void);
 
 uint8_t Current_task = 1;
 uint32_t gSysTick_Counter = 0;
@@ -73,9 +72,9 @@ int main(void)
 }
 
 
-void enable_processor_faults ()
+void enable_processor_faults (void)
 {
-	uint32_t * pSHCSR =  (uint32_t*) (0xE000ED00  +  0x24);
+	uint32_t * pSHCSR =  (uint32_t*) (0xE000ED24);
 	*pSHCSR |= ( 1U << 16);  // Memory fault activation
 	*pSHCSR |= ( 1U << 17); // Bus fault activation
 	*pSHCSR |= ( 1U << 18); // Usage fault activation
@@ -90,7 +89,7 @@ __attribute__((naked))  void init_scheduler_stack(uint32_t  top_scheduler_stck)
 
  }
 
-void init_tasks_stack()
+void init_tasks_stack(void)
 {
 	//create a local pointer  to  pointing to  the PSP of each task
 	uint32_t *pSP;
@@ -125,16 +124,16 @@ void init_tasks_stack()
 		*pSP =  DUMMY_XPSR;
 
 		// the second is the PC  as the processor is suppose to return back to task handler after the interrupt
-		pSP -- ;
+		pSP-- ;
 		*pSP = (uint32_t) user_Tasks[i].taskHandler;
 
 		// the third is the LR
-		pSP -- ;
+		pSP-- ;
 		*pSP = 0xFFFFFFFD ;
 
 		for (int j = 0 ; j < 13 ; j++) // the rest of  13 register value is initialized to zero
 		{
-			pSP -- ;
+			pSP-- ;
 			*pSP = 0 ;
 		}
 
@@ -144,7 +143,7 @@ void init_tasks_stack()
 
 void init_systick_timer(uint32_t TickCounter)
 {
-	uint32_t cntValue  = (  (SYSTICK_TIM_CLK / TickCounter) - 1);
+	uint32_t cntValue  = ( (SYSTICK_TIM_CLK / TickCounter) - 1);
 
 	uint32_t* pSTK_CTRL  =  (uint32_t*) 0xE000E010;
 	uint32_t* pSTK_LOAD =  (uint32_t*) 0xE000E014;
@@ -156,77 +155,105 @@ void init_systick_timer(uint32_t TickCounter)
 	*pSTK_LOAD |= cntValue;
 
 	// now we need to enable the bit of STK_CTRL
-	*pSTK_CTRL |=  (uint32_t)( 1  << 1U);
-	*pSTK_CTRL |=  (uint32_t)( 1  << 2U);
-	*pSTK_CTRL |=  (uint32_t)( 1  << 0U);
-
-	// you can pend the pendSV hear
-
-
-
-	// or can directly do the context switching
-
-
-
+	*pSTK_CTRL |=  ( 1 << 1);
+	*pSTK_CTRL |=  ( 1 << 2);
+	*pSTK_CTRL |=  ( 1 << 0);
 }
 
-__attribute__((naked)) switch_sp_to_psp()
+__attribute__((naked)) void switch_sp_to_psp(void)
 {
 	// we need to push LR hear
 	__asm volatile ("PUSH {LR}"); // we are using this because inside this function we are going to branch to other function to get the PSP value , so the original value of LR is going to modify
 
 	// get the PSP value in the RO
-//	__asm volatile ("BL get_psp_value(")
+	__asm volatile ("BL getPSP_Value_fromTask");
 
-
-	// store the PSP  value  in SP register of core
-
-
-	// change the SP type to PSP from MSP
-
+	// store to the  PSP  value  in SP register of core
+	__asm volatile ("MSR PSP, R0");
 
 	__asm volatile("POP {LR}");
 
-}
+	// change the SP type to PSP from MSP
+	//change SP to PSP using CONTROL register
+	__asm volatile ("MOV R0,#0X02");
+	__asm volatile ("MSR CONTROL,R0");
 
 
-uint32_t getPSP_Value_fromTask( uint8_t Current_TskNumber){
-
-
-}
-
-void  savePSP_Value_toTask( uint8_t Current_TskNumber , uint32_t pspValue ){
-
+	__asm volatile ("BX LR");
 
 }
 
 
+uint32_t getPSP_Value_fromTask(void){
+
+	return user_Tasks[Current_task].pPSPValue;
+}
+
+void  savePSP_Value_toTask(uint32_t pspValue ){
+	user_Tasks[Current_task].pPSPValue = pspValue;
+
+}
+
+// implementing the Systick handler
+void SysTick_Handler (void){
+	gSysTick_Counter++ ;
+
+	// TODO the context switch
+
+
+}
+
+
+//2. implement the fault handlers
+void HardFault_Handler(void)
+{
+	printf("Exception : Hardfault\n");
+	while(1);
+}
+
+void MemManage_Handler(void)
+{
+	printf("Exception : MemManage\n");
+	while(1);
+}
+
+void BusFault_Handler(void)
+{
+	printf("Exception : BusFault\n");
+	while(1);
+}
 
 void idletask_handler(void){
-
+	printf("IDLE \n");
 	while(1){
+
 
 	}
 }
 void task1_handler(void){
+	printf("TASK 1 \n");
 	while(1){
+
 
 	}
 
 }
 void task2_handler(void){
+	printf("TASK 2 \n");
 	while(1){
 
 	}
 
 }
 void task3_handler(void){
+	printf("TASK 3 \n");
 	while(1){
 
 	}
 
 }
 void task4_handler(void){
+	printf("TASK 4 \n");
 	while(1){
 
 	}
