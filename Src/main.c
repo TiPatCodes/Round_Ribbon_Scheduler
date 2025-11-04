@@ -34,10 +34,9 @@ void  savePSP_Value_toTask(uint32_t pspValue );
 
 typedef  struct {
 	uint32_t  pPSPValue ;
-	void (*taskHandler)( void);
 	uint8_t taskState;
 	uint32_t block_count;
-
+	void (*taskHandler)( void);
 }uHandle_Task;
 
 uHandle_Task user_Tasks[MAX_TASKS] ;
@@ -47,6 +46,8 @@ __attribute__((naked))  void init_scheduler_stack(uint32_t  top_scheduler_stck);
 void init_tasks_stack(void);
 void init_systick_timer(uint32_t TickCounter);
 __attribute__((naked)) void switch_sp_to_psp(void);
+void update_next_task (void);
+
 
 uint8_t Current_task = 1;
 uint32_t gSysTick_Counter = 0;
@@ -75,9 +76,9 @@ int main(void)
 void enable_processor_faults (void)
 {
 	uint32_t * pSHCSR =  (uint32_t*) (0xE000ED24);
-	*pSHCSR |= ( 1U << 16);  // Memory fault activation
-	*pSHCSR |= ( 1U << 17); // Bus fault activation
-	*pSHCSR |= ( 1U << 18); // Usage fault activation
+	*pSHCSR |= ( 1 << 16);  // Memory fault activation
+	*pSHCSR |= ( 1 << 17); // Bus fault activation
+	*pSHCSR |= ( 1 << 18); // Usage fault activation
 }
 
 __attribute__((naked))  void init_scheduler_stack(uint32_t  top_scheduler_stck)
@@ -120,6 +121,7 @@ void init_tasks_stack(void)
 	{
 		pSP =  (uint32_t*)(user_Tasks[i].pPSPValue) ;
 
+		pSP--;
 		// the first register is PSR
 		*pSP =  DUMMY_XPSR;
 
@@ -171,13 +173,13 @@ __attribute__((naked)) void switch_sp_to_psp(void)
 	// store to the  PSP  value  in SP register of core
 	__asm volatile ("MSR PSP, R0");
 
-	__asm volatile("POP {LR}");
+	__asm volatile("POP {LR}");  //--- till here we were using  MSP in thread mode
+
 
 	// change the SP type to PSP from MSP
 	//change SP to PSP using CONTROL register
 	__asm volatile ("MOV R0,#0X02");
 	__asm volatile ("MSR CONTROL,R0");
-
 
 	__asm volatile ("BX LR");
 
@@ -191,15 +193,57 @@ uint32_t getPSP_Value_fromTask(void){
 
 void  savePSP_Value_toTask(uint32_t pspValue ){
 	user_Tasks[Current_task].pPSPValue = pspValue;
+}
 
+
+void update_next_task (void){
+	int state = TASK_BLOCKED_STATE;
+
+	for(int i= 0 ; i < (MAX_TASKS) ; i++)
+	{
+		Current_task++;
+		Current_task = Current_task % MAX_TASKS;
+		state = user_Tasks[Current_task].taskState;
+		if( (state == TASK_READY_STATE) && (Current_task != 0) )
+			break;
+	}
+
+	if(state != TASK_READY_STATE)
+		Current_task = 0;
 }
 
 // implementing the Systick handler
 void SysTick_Handler (void){
 	gSysTick_Counter++ ;
 
-	// TODO the context switch
+	//	/*Save the context of current task */
+	//1. Get current running task's PSP value
+	__asm volatile("MRS R0,PSP");
+	//2. Using that PSP value store SF2( R4 to R11)
+	__asm volatile("STMDB R0!,{R4-R11}");
 
+	__asm volatile("PUSH {LR}");
+
+	//3. Save the current value of PSP
+    __asm volatile("BL savePSP_Value_toTask");
+
+	/*Retrieve the context of next task */
+
+	//1. Decide next task to run
+    __asm volatile("BL update_next_task");
+
+	//2. get its past PSP value
+	__asm volatile ("BL getPSP_Value_fromTask");
+
+	//3. Using that PSP value retrieve SF2(R4 to R11)
+	__asm volatile ("LDMIA R0!,{R4-R11}");
+
+	//4. update PSP and exit
+	__asm volatile("MSR PSP,R0");
+
+	__asm volatile("POP {LR}");
+
+	__asm volatile("BX LR");
 
 }
 
@@ -224,38 +268,28 @@ void BusFault_Handler(void)
 }
 
 void idletask_handler(void){
-	printf("IDLE \n");
 	while(1){
-
-
+		printf("IDLE \n");
 	}
 }
 void task1_handler(void){
-	printf("TASK 1 \n");
 	while(1){
-
-
+		printf("TASK 1 \n");
 	}
-
 }
+
 void task2_handler(void){
-	printf("TASK 2 \n");
 	while(1){
-
+	printf("TASK 2 \n");
 	}
-
 }
 void task3_handler(void){
-	printf("TASK 3 \n");
 	while(1){
-
+	printf("TASK 3 \n");
 	}
-
 }
 void task4_handler(void){
-	printf("TASK 4 \n");
 	while(1){
-
+	printf("TASK 4 \n");
 	}
-
 }
