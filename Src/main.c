@@ -79,7 +79,7 @@ void idle(void)
 {
 	while(1)
 	{
-
+		printf("IDLE \n ");
 	}
 }
 void task1_handler(void)
@@ -159,7 +159,7 @@ void init_tasks_stack(void)
 
 
 	// also assigned for each task the initial value of PSR , PC and LR , R12, R3 , R2, R1, R0 by decrementing the PSP pointer
-	for ( int i = 1;  i< MAX_TASKS ; i++)
+	for ( int i = 0;  i < MAX_TASKS ; i++)
 	{
 		pSP =  (uint32_t*)(user_Tasks[i].pPSPValue) ;
 
@@ -194,7 +194,7 @@ void init_systick_timer(uint32_t TickCounter)
 
 	//we need to load the value of counter into STK_LOAD register from bit[23:0]
 
-	*pSTK_LOAD &= ~(0x00FFFFFFFF) ;
+	*pSTK_LOAD &= ~(0x00FFFFFFFF);
 
 	*pSTK_LOAD |= cntValue;
 
@@ -237,29 +237,25 @@ void  savePSP_Value_toTask(uint32_t pspValue ){
 }
 
 
-void update_next_task (void){
-//	int state = TASK_BLOCKED_STATE;
+void update_next_task (void)
+{
+	uint8_t state = TASK_BLOCKED_STATE;
 //
-//	for(int i= 0 ; i < (MAX_TASKS) ; i++)
-//	{
-//		Current_task++;
-////		Current_task = Current_task  % (MAX_TASKS);
+	for(int i = 0 ; i < (MAX_TASKS) ; i++)
+	{
+		Current_task++;
+		Current_task = Current_task  % (MAX_TASKS);
 //		if ( Current_task >= MAX_TASKS) Current_task = 1;
-//		state = user_Tasks[Current_task].taskState;
-//		if( (state == TASK_READY_STATE) && (Current_task != 0) )
-//			break;
-//	}
-//
-//	if(state != TASK_READY_STATE)
-//		Current_task = 0;
+		state = user_Tasks[Current_task].taskState;
+		if( (state == TASK_READY_STATE) && (Current_task != 0) )
+			break;
+	}
 
-	Current_task++;
-	//		Current_task = Current_task  % (MAX_TASKS);
-	if ( Current_task >= MAX_TASKS) Current_task = 1;
+//	if ( Current_task >= MAX_TASKS) Current_task = 1;
 }
 
 // implementing the Systick handler
-void SysTick_Handler (void){
+__attribute__((naked)) void SysTick_Handler (void){
     //	gSysTick_Counter++ ;
 
     /*Save the context of current task */

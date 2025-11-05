@@ -11,8 +11,8 @@
 ../Src/main.c:207:29:switch_sp_to_psp	1
 ../Src/main.c:231:10:getPSP_Value_fromTask	1
 ../Src/main.c:235:7:savePSP_Value_toTask	1
-../Src/main.c:240:6:update_next_task	2
-../Src/main.c:262:6:SysTick_Handler	1
-../Src/main.c:297:6:HardFault_Handler	1
-../Src/main.c:306:6:MemManage_Handler	1
-../Src/main.c:315:6:BusFault_Handler	1
+../Src/main.c:240:6:update_next_task	4
+../Src/main.c:258:29:SysTick_Handler	1
+../Src/main.c:293:6:HardFault_Handler	1
+../Src/main.c:302:6:MemManage_Handler	1
+../Src/main.c:311:6:BusFault_Handler	1
