@@ -64,7 +64,7 @@ int main(void)
 
 	init_tasks_stack();
 
-//	led_init_all();
+	led_init_all();
 
 	init_systick_timer(TICK_HZ);
 

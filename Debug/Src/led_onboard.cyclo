@@ -1,0 +1,3 @@
+../Src/led_onboard.c:13:7:led_init_all	1
+../Src/led_onboard.c:30:6:led_on	1
+../Src/led_onboard.c:35:6:led_off	1

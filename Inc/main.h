@@ -8,6 +8,9 @@
 #ifndef MAIN_H_
 #define MAIN_H_
 
+#include "led_onboard.h"
+
+
 #define TICK_HZ  1000U
 
 #define MAX_TASKS   5
