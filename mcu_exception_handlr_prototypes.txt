@@ -1,14 +1,9 @@
-#include <stdint.h>
-
-#define SRAM_START     (0x20000000U)
-#define SRAM_SIZE      (1024U * 128U)  // thousand is 1024 we have 128Kb SRAM
-#define SRAM_END       (SRAM_START + SRAM_SIZE)
-#define STACK_START    (SRAM_END)
+/* function prototypes of STM32F407x system exception and IRQ handlers */
 
 void Reset_Handler(void);
-//  we will give the "alias" handler with "weak" definition so that it can be override
-void NMI_Handler                    (void) __attribute__((weak,alias("Default_Handler")));
-void HardFault_Handler              (void) __attribute__((weak,alias("Default_Handler")));
+
+void NMI_Handler 					(void) __attribute__ ((weak, alias("Default_Handler")));
+void HardFault_Handler 				(void) __attribute__ ((weak, alias("Default_Handler")));
 void MemManage_Handler 				(void) __attribute__ ((weak, alias("Default_Handler")));
 void BusFault_Handler 				(void) __attribute__ ((weak, alias("Default_Handler")));
 void UsageFault_Handler 			(void) __attribute__ ((weak, alias("Default_Handler")));
@@ -97,24 +92,3 @@ void DCMI_IRQHandler             	(void) __attribute__ ((weak, alias("Default_Ha
 void CRYP_IRQHandler             	(void) __attribute__ ((weak, alias("Default_Handler")));
 void HASH_RNG_IRQHandler         	(void) __attribute__ ((weak, alias("Default_Handler")));
 void FPU_IRQHandler              	(void) __attribute__ ((weak, alias("Default_Handler"))); 
-
-
-// we put this inside a "seperate section" called .isr_vector
-uint32_t vectors[] __attribute__((section(".isr_vector"))) = {
-    STACK_START,
-    (uint32_t)&Reset_Handler ,
-    (uint32_t)&NMI_Handler,  // because we have used the "alias" attribute when we refer to the address of NMI it will take the address of default handler 
-    (uint32_t)&HardFault_Handler ,
-    // like wise we will create each Handler address space in the vector table 
-
-};
-
-void Default_Handler(void)
-{
-    while(1);
-}
-
-void Reset_Handler(void)
-{
-
-}
