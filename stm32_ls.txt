@@ -1,0 +1,33 @@
+ENTRY(Reset_Handler)  //--> Mention the entry point of the code execution in memory
+
+/*
+MEMORY COMMAND  --> to name the a region in memory by specifying its ORIGIN and LENGTH
+Syntax :
+MEMORY
+{
+    name(attr): ORIGIN= origin_address.LENGTH=len
+}
+
+for (attr) can be 
+R : read only section
+W : Read and Write 
+X : Section containing executable code
+A : Allocated sections
+I : initialized sections
+L : Same as I 
+! : invert the sense of any of the following attributes  ex: !R  :  not readonly section
+you can add the letters in attribute ex : (attr) =  ARWX
+*/
+
+MEMORY
+{
+    FLASH(rx):ORIGIN=0x08000000,LENGTH=1024K
+    SRAM1(rwx):ORIGIN=0x20000000,LENGTH=116K
+    SRAM2(rwx):ORIGIN=0x20000000+116K-4,LENGTH=16K
+}
+
+
+/*
+SECTION Command  --> using this you can create different output sections in the final elf generated
+                 --> also controls the order in which different output sections appear in the elf file generated
+                 
