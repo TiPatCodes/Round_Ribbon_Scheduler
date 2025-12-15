@@ -5,6 +5,17 @@
 #define SRAM_END       (SRAM_START + SRAM_SIZE)
 #define STACK_START    (SRAM_END)
 
+extern uint32_t _etext;
+extern uint32_t _sdata; // will be used to calculate the size of the .data section
+extern uint32_t _edata;
+extern uint32_t _sbss;  // will be used to calculate the size of .bss section
+extern uint32_t _ebss;
+
+//prototype of main 
+int main(void) ;
+
+
+// function prototype of various System Handler function
 void Reset_Handler(void);
 //  we will give the "alias" handler with "weak" definition so that it can be override
 void NMI_Handler                  (void) __attribute__((weak,alias("Default_Handler")));
@@ -194,7 +205,7 @@ uint32_t vectors[] __attribute__((section(".isr_vector")))
     (uint32_t)DCMI_IRQHandler,
     (uint32_t)CRYP_IRQHandler,
     (uint32_t)HASH_RNG_IRQHandler,
-    (uint32_t)FPU_IRQHandler
+    (uint32_t)FPU_IRQHandler,
 };
 
 void Default_Handler(void)
@@ -204,5 +215,31 @@ void Default_Handler(void)
 
 void Reset_Handler(void)
 {
+
+    // copy data from .data to .bss
+    uint32_t size_data =  &_edata  - &_sdata;
+    uint32_t *pDst = (uint32_t*)_sdata ;  // SRAM1
+    uint32_t *pSrc = (uint32_t*)_etext ; // FLASH end of .text section
+
+    for (uint32_t i = 0 ;  i< size_data ; i++)
+    {
+        *pDst++ = *pSrc++;
+    }
+
+    // initialize .bss section to zero
+    uint32_t size_bss =  &_ebss  - &_sbss;
+    uint32_t *pDst = (uint32_t*)_sbss ;  // SRAM1 start of the .bss
+    uint32_t *pSrc = (uint32_t*)_ebss ;  // SRAM1 end of the .bss
+
+    for (uint32_t i = 0 ;  i< size_bss ; i++)
+    {
+        *pDst++ = 0;
+    }
+
+    // initialize the standard library
+
+
+    //initialize the int main(void) 
+    main();
 
 }
