@@ -26,8 +26,10 @@ arm-none-eabi-nm.exe <name_of_elf_file>
 
 
 
-GDB client application port 3333 --->  OCD --> ST link driver (USB driver for ST link debugger ) --> ST link Debugger -- SWDIO                   -->  Micro controller ( MCU ) 
-                                                                                                                     -- SWDCLK (controlled by ST link debugger as master) -->
+GDB client application user local host port 3333 to talk --->  OpenOCD server host application --> ST link driver (USB driver for ST link debugger ) --> ST link Debugger hardware -- SWDIO &  SWDCLK (controlled by ST link debugger as master)     -->  Micro controller ( MCU ) --> Debugg Port ---> Give access to AHB bus matrix  --> Get access to FLASH memory region.
+                                                                                                                    
+- In this project I have used a OpenOCD version "xpack-openocd-0.12.0-6"  and not the STM cubeIDE pluging external tool version as its more limited to the STM32 supported board 
+
 
 
 

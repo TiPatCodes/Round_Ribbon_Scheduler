@@ -1,15 +1,10 @@
 ENTRY(Reset_Handler) 
 
-
 MEMORY
 {
-    FLASH(rx):ORIGIN =0x08000000,LENGTH=1024K
-    SRAM1(rwx):ORIGIN =0x20000000,LENGTH=116K
-    SRAM2(rwx):ORIGIN =0x20000000+116K-4,LENGTH=16K
+    FLASH(rx) :ORIGIN = 0x08000000, LENGTH = 1024K
+    SRAM(rwx) :ORIGIN = 0x20000000, LENGTH = 128K
 }
-
-
-
 
 SECTIONS
 {
@@ -17,7 +12,7 @@ SECTIONS
     .text :
     {
         
-        (.isr_vector)
+        *(.isr_vector)
 
         *(.text)
 
@@ -36,7 +31,7 @@ SECTIONS
         _edata = .;
 
 
-    }>SRAM1  AT> FLASH
+    }>SRAM  AT> FLASH
 
     .bss :
     {   
@@ -46,8 +41,7 @@ SECTIONS
         . = ALIGN(4);
         _ebss = .;
 
-    }>SRAM1  AT> SRAM1
-
+    }>SRAM  AT> SRAM
 
 }
 
