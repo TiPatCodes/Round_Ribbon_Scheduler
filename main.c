@@ -17,7 +17,7 @@
  */
 
 #include <stdint.h>
-#include <stdio.h>
+// #include <stdio.h>
 #include "main.h"
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
@@ -79,14 +79,14 @@ void idle(void)
 {
 	while(1)
 	{
-		printf("IDLE \n ");
+		// printf("IDLE \n ");
 	}
 }
 void task1_handler(void)
 {
 	while(1)
 	{
-		printf("TASK 1\n ");
+		// printf("TASK 1\n ");
 	}
 }
 
@@ -94,7 +94,7 @@ void task2_handler(void)
 {
 	while(1)
 	{
-		printf("TASK 2 \n ");
+		// printf("TASK 2 \n ");
 	}
 }
 
@@ -102,7 +102,7 @@ void task3_handler(void)
 {
 	while(1)
 	{
-		printf("TASK 3 \n");
+		// printf("TASK 3 \n");
 	}
 }
 
@@ -110,7 +110,7 @@ void task4_handler(void)
 {
 	while(1)
 	{
-		printf(" TASK 4 \n");
+		// printf(" TASK 4 \n");
 	}
 }
 
@@ -292,7 +292,7 @@ __attribute__((naked)) void SysTick_Handler (void){
 //2. implement the fault handlers
 void HardFault_Handler(void)
 {
-	printf(" Hard fault occurred \n");
+	// printf(" Hard fault occurred \n");
 	while (1)
 	{
 
@@ -301,7 +301,7 @@ void HardFault_Handler(void)
 
 void MemManage_Handler(void)
 {
-	printf(" Mem manage fault occurred \n");
+	// printf(" Mem manage fault occurred \n");
 	while (1)
 	{
 
@@ -310,7 +310,7 @@ void MemManage_Handler(void)
 
 void BusFault_Handler(void)
 {
-	printf(" Bus hard  fault occurred \n");
+	// printf(" Bus hard  fault occurred \n");
 	while (1)
 	{
 

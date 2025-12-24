@@ -3,7 +3,7 @@
 #define SRAM_START     (0x20000000U)
 #define SRAM_SIZE      (1024U * 128U)  // thousand is 1024 we have 128Kb SRAM
 #define SRAM_END       (SRAM_START + SRAM_SIZE)
-#define STACK_START    (SRAM_END)
+#define STACK_START    (SRAM_END)  // because we have full descending step 
 
 extern uint32_t _etext;
 extern uint32_t _sdata; // will be used to calculate the size of the .data section
@@ -44,17 +44,17 @@ void DMA1_Stream3_IRQHandler          (void) __attribute__((weak,alias("Default_
 void DMA1_Stream4_IRQHandler          (void) __attribute__((weak,alias("Default_Handler")));  
 void DMA1_Stream5_IRQHandler          (void) __attribute__((weak,alias("Default_Handler")));  
 void DMA1_Stream6_IRQHandler          (void) __attribute__((weak,alias("Default_Handler")));  
-void ADC_IRQHandler          (void) __attribute__((weak,alias("Default_Handler")));             
-void CAN1_TX_IRQHandler          (void) __attribute__((weak,alias("Default_Handler")));         
-void CAN1_RX0_IRQHandler          (void) __attribute__((weak,alias("Default_Handler")));        
-void CAN1_RX1_IRQHandler          (void) __attribute__((weak,alias("Default_Handler")));        
-void CAN1_SCE_IRQHandler          (void) __attribute__((weak,alias("Default_Handler")));        
-void EXTI9_5_IRQHandler          (void) __attribute__((weak,alias("Default_Handler")));         
-void TIM1_BRK_TIM9_IRQHandler          (void) __attribute__((weak,alias("Default_Handler"))); 
-void TIM1_UP_TIM10_IRQHandler          (void) __attribute__((weak,alias("Default_Handler"))); 
-void TIM1_TRG_COM_TIM11_IRQHandler          (void) __attribute__((weak,alias("Default_Handler")));
-void TIM1_CC_IRQHandler          (void) __attribute__((weak,alias("Default_Handler")));         
-void TIM2_IRQHandler          (void) __attribute__((weak,alias("Default_Handler")));            
+void ADC_IRQHandler                   (void) __attribute__((weak,alias("Default_Handler")));             
+void CAN1_TX_IRQHandler               (void) __attribute__((weak,alias("Default_Handler")));         
+void CAN1_RX0_IRQHandler              (void) __attribute__((weak,alias("Default_Handler")));        
+void CAN1_RX1_IRQHandler              (void) __attribute__((weak,alias("Default_Handler")));        
+void CAN1_SCE_IRQHandler              (void) __attribute__((weak,alias("Default_Handler")));        
+void EXTI9_5_IRQHandler               (void) __attribute__((weak,alias("Default_Handler")));         
+void TIM1_BRK_TIM9_IRQHandler         (void) __attribute__((weak,alias("Default_Handler"))); 
+void TIM1_UP_TIM10_IRQHandler         (void) __attribute__((weak,alias("Default_Handler"))); 
+void TIM1_TRG_COM_TIM11_IRQHandler    (void) __attribute__((weak,alias("Default_Handler")));
+void TIM1_CC_IRQHandler               (void) __attribute__((weak,alias("Default_Handler")));         
+void TIM2_IRQHandler                  (void) __attribute__((weak,alias("Default_Handler")));            
 void TIM3_IRQHandler          (void) __attribute__((weak,alias("Default_Handler")));            
 void TIM4_IRQHandler          (void) __attribute__((weak,alias("Default_Handler")));            
 void I2C1_EV_IRQHandler          (void) __attribute__((weak,alias("Default_Handler")));         
@@ -112,7 +112,7 @@ void FPU_IRQHandler          (void) __attribute__((weak,alias("Default_Handler")
 // TODO: add the remaining reserved registers
 
 // we put this inside a "seperate section" called .isr_vector
-uint32_t vectors[] __attribute__((section(".isr_vector")))  
+uint32_t __attribute__((section(".isr_vector"))) vectors[]  =
 {
     STACK_START,
     (uint32_t)Reset_Handler ,
@@ -227,13 +227,13 @@ void Reset_Handler(void)
 
     for (uint32_t i = 0 ;  i< size_data ; i++)
     {
-        *pDst++ = *pSrc++;
+        *pDst_data++ = *pSrc_data++;
     }
 
     // initialize .bss section to zero
-    uint32_t size_bss =  &_ebss  - &_sbss;
+    uint32_t size_bss =  &(_ebss)  - &(_sbss);
     uint32_t *pDst = (uint32_t*)_sbss ;  // SRAM1 start of the .bss
-    uint32_t *pSrc = (uint32_t*)_ebss ;  // SRAM1 end of the .bss
+    // uint32_t *pSrc = (uint32_t*)_ebss ;  // SRAM1 end of the .bss
 
     for (uint32_t i = 0 ;  i< size_bss ; i++)
     {

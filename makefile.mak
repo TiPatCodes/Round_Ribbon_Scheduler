@@ -11,7 +11,7 @@ all main.o led_onbord.o stm32_startupcode.o syscalls.o finalmake.elf
 main.o:main.c
 	$(CC) $(CFLAGS) $^ -o $@
 
-led_onbord.o:led_onbord.c
+led_onboard.o:led_onboard.c
 	$(CC) $(CFLAGS) $^ -o $@
 
 stm32_startupcode.o:stm32_startupcode.c
@@ -32,7 +32,7 @@ finalmake.elf: main.o led_onbord.o stm32_startupcode.O
 #  finalmake.elf: main.o led_onbord.o stm32_startupcode.O
 # 	$(CC) $(LDFLAGS_SH) $^ -o $@
 clean:
-	del main.o led_onbord.o stm32_startupcode.o  finalmake.elf
+	rm -rf  *.o  *.elf *.map
 
 
 load:
