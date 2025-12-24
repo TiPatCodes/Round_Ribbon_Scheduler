@@ -16,11 +16,14 @@ run the command
 arm-none-eabi-nm.exe <name_of_elf_file>
 
 
+- if you want to reun the objdump on elf file
+arm-none-eabi-objdump.exe  -h <name_of_elf_file>
+
 
 
 - Open OCD :  Host application for programming and debugging the target 
 
--  St link driver - A usb driver for host to connect st link debugger hardware as device on PC's USB port.
+- St link driver - A usb driver for host to connect st link debugger hardware as device on PC's USB port.
 
 - Debugger adapter / programming adapter  - Protocol conversion from host interface protocal ( USB)  --  to -- target interface protocol ( SWD / JTAG etc )
 
@@ -29,8 +32,25 @@ arm-none-eabi-nm.exe <name_of_elf_file>
 GDB client application port 3333 --->  OCD --> ST link driver (USB driver for ST link debugger ) --> ST link Debugger -- SWDIO                   -->  Micro controller ( MCU ) 
                                                                                                                      -- SWDCLK (controlled by ST link debugger as master) -->
 
+- Some of the Open OCD command ( you acn refer - https://openocd.org/doc/html/General-Commands.html )
+  IMPORTANT - if using the GDB as client you have to use a suffix - "monitor"
+
+        - reset init 
+        -  flash write_image erase <elf file name>
+        - reset
+        - halt
+        - mdw : to read the memory in word length <address>  <count>
+        - bp
+
+C standard library
+        - Newlib ( libc.a)  
+        - Newlibnano(libs-nano.a)
 
 
+
+To  run the Open OCD with semi-hosting you need to make additional changes to the make file and lnker script
+        - add symbol __end__ instead of end
+        - add new instructions in linker script for semi-hosting , as it doesn't need syscalls.c 
 
  HAPPY CODING :)
 

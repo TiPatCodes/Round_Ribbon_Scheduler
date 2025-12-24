@@ -10,10 +10,10 @@ extern uint32_t _sdata; // will be used to calculate the size of the .data secti
 extern uint32_t _edata;
 extern uint32_t _sbss;  // will be used to calculate the size of .bss section
 extern uint32_t _ebss;
-
+extern uint32_t _la_data;
 //prototype of main 
 int main(void) ;
-
+void __libc_init_array(void);
 
 // function prototype of various System Handler function
 void Reset_Handler(void);
@@ -109,6 +109,7 @@ void CRYP_IRQHandler         (void) __attribute__((weak,alias("Default_Handler")
 void HASH_RNG_IRQHandler         (void) __attribute__((weak,alias("Default_Handler")));
 void FPU_IRQHandler          (void) __attribute__((weak,alias("Default_Handler"))); 
 
+// TODO: add the remaining reserved registers
 
 // we put this inside a "seperate section" called .isr_vector
 uint32_t vectors[] __attribute__((section(".isr_vector")))  
@@ -217,9 +218,12 @@ void Reset_Handler(void)
 {
 
     // copy data from .data to .bss
-    uint32_t size_data =  &_edata  - &_sdata;
+    uint32_t size_data =  (uint32_t)&_edata  - (uint32_t)&_sdata;
     uint32_t *pDst = (uint32_t*)_sdata ;  // SRAM1
-    uint32_t *pSrc = (uint32_t*)_etext ; // FLASH end of .text section
+    // uint32_t *pSrc = (uint32_t*)_etext ; // FLASH end of .text section  --  This symbol of linker is outdates after having the syscalls.c it added new section\
+    in text so end of text section changes
+    uint32_t *pSrc = (uint32_t*)_la_data ;
+
 
     for (uint32_t i = 0 ;  i< size_data ; i++)
     {
@@ -237,7 +241,7 @@ void Reset_Handler(void)
     }
 
     // initialize the standard library
-
+    __libc_init_array();
 
     //initialize the int main(void) 
     main();
