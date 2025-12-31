@@ -17,7 +17,7 @@
  */
 
 #include <stdint.h>
-// #include <stdio.h>
+#include <stdio.h>
 #include "main.h"
 
 #if !defined(__SOFT_FP__) && defined(__ARM_FP)
@@ -35,6 +35,7 @@ void task4_handler(void);
 uint32_t getPSP_Value_fromTask( void);
 void  savePSP_Value_toTask(uint32_t pspValue );
 
+
 typedef  struct {
 	uint32_t  pPSPValue ;
 	uint32_t block_count;
@@ -50,6 +51,12 @@ void init_tasks_stack(void);
 void init_systick_timer(uint32_t TickCounter);
 __attribute__((naked)) void switch_sp_to_psp(void);
 void update_next_task (void);
+
+// for testing memory sections
+const uint32_t cons_v_1 = 100;
+const uint32_t cons_v_2 = 200;
+const uint8_t cons_v_3 = 50;
+
 
 
 uint8_t Current_task = 1;
@@ -79,14 +86,14 @@ void idle(void)
 {
 	while(1)
 	{
-		// printf("IDLE \n ");
+		printf("IDLE \n ");
 	}
 }
 void task1_handler(void)
 {
 	while(1)
 	{
-		// printf("TASK 1\n ");
+		printf("TASK 1\n ");
 	}
 }
 
@@ -94,7 +101,7 @@ void task2_handler(void)
 {
 	while(1)
 	{
-		// printf("TASK 2 \n ");
+		printf("TASK 2 \n ");
 	}
 }
 
@@ -102,7 +109,7 @@ void task3_handler(void)
 {
 	while(1)
 	{
-		// printf("TASK 3 \n");
+		printf("TASK 3 \n");
 	}
 }
 
@@ -110,7 +117,7 @@ void task4_handler(void)
 {
 	while(1)
 	{
-		// printf(" TASK 4 \n");
+		printf(" TASK 4 \n");
 	}
 }
 
@@ -240,18 +247,17 @@ void  savePSP_Value_toTask(uint32_t pspValue ){
 void update_next_task (void)
 {
 	uint8_t state = TASK_BLOCKED_STATE;
-//
 	for(int i = 0 ; i < (MAX_TASKS) ; i++)
 	{
 		Current_task++;
 		Current_task = Current_task  % (MAX_TASKS);
-//		if ( Current_task >= MAX_TASKS) Current_task = 1;
+
 		state = user_Tasks[Current_task].taskState;
 		if( (state == TASK_READY_STATE) && (Current_task != 0) )
 			break;
 	}
+	// here you can add the condition if the state is blocked for the current task , then we switch to idel task
 
-//	if ( Current_task >= MAX_TASKS) Current_task = 1;
 }
 
 // implementing the Systick handler
@@ -262,7 +268,7 @@ __attribute__((naked)) void SysTick_Handler (void){
 	//1. Get current running task's PSP value
 	__asm volatile("MRS R0,PSP");
 	//2. Using that PSP value store SF2( R4 to R11)
-	__asm volatile("STMDB R0!,{R4-R11}");
+	__asm volatile("STMDB R0!,{R4-R11}");  // here we use ! to indicate that the R0 value updates after each register saving 
 
 	__asm volatile("PUSH {LR}");
 

@@ -40,6 +40,7 @@ SECTIONS
     .bss :
     {   
         _sbss = .;
+        __bss_start__ = _sbss ;
         *(.bss)
         *(.COMMON)
         . = ALIGN(4);
