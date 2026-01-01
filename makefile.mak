@@ -31,7 +31,6 @@ finalmake.elf: main.o led_onboard.o stm32_startupcode.o syscalls.o
 clean:
 	rm -rf  *.o  *.elf *.map
 
-
 load:
 	openocd -f board/stm32f4discovery.cfg
 

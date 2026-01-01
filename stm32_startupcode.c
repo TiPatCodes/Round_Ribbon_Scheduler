@@ -219,12 +219,12 @@ void Reset_Handler(void)
 
     // copy data from .data to .bss
     uint32_t size_data =  (uint32_t)&_edata  - (uint32_t)&_sdata;
-    uint32_t *pDst_data = (uint32_t*)_sdata ;  // SRAM1
+    uint8_t *pDst_data = (uint8_t*)_sdata ;  // SRAM1
     // uint32_t *pSrc_data = (uint32_t*)_etext ;
     
     // FLASH end of .text section  --  This symbol of linker is outdates after having the syscalls.c it added new section
     // in text so end of text section changes
-    uint32_t *pSrc_data = (uint32_t*)_la_data ;
+    uint8_t *pSrc_data = (uint8_t*)_la_data ;
 
 
     for (uint32_t i = 0 ;  i< size_data ; i++)
@@ -233,8 +233,8 @@ void Reset_Handler(void)
     }
 
     // initialize .bss section to zero
-    uint32_t size_bss =  &(_ebss)  - &(_sbss);
-    uint32_t *pDst = (uint32_t*)_sbss ;  // SRAM1 start of the .bss
+    uint32_t size_bss =  (uint32_t)&_ebss  - (uint32_t)&_sbss;
+    uint8_t *pDst = (uint8_t*)_sbss ;  // SRAM1 start of the .bss
     // uint32_t *pSrc = (uint32_t*)_ebss ;  // SRAM1 end of the .bss
 
     for (uint32_t i = 0 ;  i< size_bss ; i++)

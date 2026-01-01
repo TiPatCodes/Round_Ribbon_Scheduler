@@ -301,7 +301,7 @@ void HardFault_Handler(void)
 	// printf(" Hard fault occurred \n");
 	while (1)
 	{
-
+		 
 	}
 }
 

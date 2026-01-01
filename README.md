@@ -10,7 +10,7 @@ Requisit on your system:
         finalfile :  dependencies files
 	        command  ( command can be made using a FLAGS) which are predefined
         ---------*/
-
+file
 - if we want to see all the symbol of the elf file 
 run the command 
 arm-none-eabi-nm.exe <name_of_elf_file>
@@ -36,6 +36,9 @@ GDB client application user local host port 3333 to talk --->  OpenOCD server ho
 
 - Some of the Open OCD command ( you acn refer - https://openocd.org/doc/html/General-Commands.html )
   IMPORTANT - if using the GDB as client you have to use a suffix - "monitor"
+
+        To connect to OpenOCD from GDB client
+        target remote localhost:3333
 
         - reset init 
         -  flash write_image erase <elf file name>
