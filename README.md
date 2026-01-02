@@ -1,6 +1,7 @@
 This project covers the Baremetal programming method for running a embedded project on the STM32F407 Cortex-M4 processor
 Requisit on your system:
         -  Need to have arm-GCC tool chain
+        - Some resources about the GCC and its __attribute__  = https://gcc.gnu.org/onlinedocs/gcc-15.2.0/gcc/Common-Function-Attributes.html
         -  GNU MAKE engine for windows
 
 
@@ -56,6 +57,13 @@ C standard library
 To  run the Open OCD with semi-hosting you need to make additional changes to the make file and lnker script
         - add symbol __end__ instead of end
         - add new instructions in linker script for semi-hosting , as it doesn't need syscalls.c 
+        - add the function in main.c for initializing the semihosting
+        extern void initialise_monitor_handles(void);
+        - after downloading the program 
+        enable the semihosting 
+        arm semihosting enable 
+        
+
 
  HAPPY CODING :)
 

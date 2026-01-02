@@ -109,7 +109,7 @@ void CRYP_IRQHandler         (void) __attribute__((weak,alias("Default_Handler")
 void HASH_RNG_IRQHandler         (void) __attribute__((weak,alias("Default_Handler")));
 void FPU_IRQHandler          (void) __attribute__((weak,alias("Default_Handler"))); 
 
-// TODO: add the remaining reserved registers
+
 
 // we put this inside a "seperate section" called .isr_vector
 uint32_t __attribute__((section(".isr_vector"))) vectors[]  =
@@ -122,8 +122,10 @@ uint32_t __attribute__((section(".isr_vector"))) vectors[]  =
     (uint32_t)MemManage_Handler,
     (uint32_t)BusFault_Handler,
     (uint32_t)UsageFault_Handler,
+    0,
     (uint32_t)SVC_Handler 	,
     (uint32_t)DebugMon_Handler ,
+    0,
     (uint32_t)PendSV_Handler   ,
     (uint32_t)SysTick_Handler  ,
     (uint32_t)WWDG_IRQHandler ,
@@ -224,10 +226,11 @@ void Reset_Handler(void)
     
     // FLASH end of .text section  --  This symbol of linker is outdates after having the syscalls.c it added new section
     // in text so end of text section changes
+    
     uint8_t *pSrc_data = (uint8_t*)_la_data ;
 
 
-    for (uint32_t i = 0 ;  i< size_data ; i++)
+    for (uint32_t i = 0 ;  i < size_data ; i++)
     {
         *pDst_data++ = *pSrc_data++;
     }

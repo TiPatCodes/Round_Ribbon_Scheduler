@@ -57,7 +57,8 @@ const uint32_t cons_v_1 = 100;
 const uint32_t cons_v_2 = 200;
 const uint8_t cons_v_3 = 50;
 
-
+// for semithosting
+extern void initialise_monitor_handles(void);
 
 uint8_t Current_task = 1;
 uint32_t gSysTick_Counter = 0;
@@ -66,6 +67,10 @@ int main(void)
 {
     /* Loop forever */
 	enable_processor_faults();
+	
+	printf(" Start the main \n");
+	
+	initialise_monitor_handles();// initialize function for semihosting
 
 	init_scheduler_stack(SCHED_STACK_START);
 
@@ -94,6 +99,7 @@ void task1_handler(void)
 	while(1)
 	{
 		printf("TASK 1\n ");
+		led_on(LED_GREEN);
 	}
 }
 
@@ -102,6 +108,7 @@ void task2_handler(void)
 	while(1)
 	{
 		printf("TASK 2 \n ");
+		led_on(LED_ORANGE);
 	}
 }
 
@@ -110,6 +117,7 @@ void task3_handler(void)
 	while(1)
 	{
 		printf("TASK 3 \n");
+		led_on(LED_RED);
 	}
 }
 
@@ -118,6 +126,7 @@ void task4_handler(void)
 	while(1)
 	{
 		printf(" TASK 4 \n");
+		led_on(LED_BLUE);
 	}
 }
 
@@ -298,16 +307,16 @@ __attribute__((naked)) void SysTick_Handler (void){
 //2. implement the fault handlers
 void HardFault_Handler(void)
 {
-	// printf(" Hard fault occurred \n");
+	printf(" Hard fault occurred \n");
 	while (1)
 	{
-		 
+		
 	}
 }
 
 void MemManage_Handler(void)
 {
-	// printf(" Mem manage fault occurred \n");
+	printf(" Mem manage fault occurred \n");
 	while (1)
 	{
 
@@ -316,7 +325,7 @@ void MemManage_Handler(void)
 
 void BusFault_Handler(void)
 {
-	// printf(" Bus hard  fault occurred \n");
+	printf(" Bus hard  fault occurred \n");
 	while (1)
 	{
 
