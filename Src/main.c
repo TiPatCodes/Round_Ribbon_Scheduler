@@ -87,6 +87,7 @@ void task1_handler(void)
 	while(1)
 	{
 		printf("TASK 1\n ");
+
 	}
 }
 
@@ -103,6 +104,7 @@ void task3_handler(void)
 	while(1)
 	{
 		printf("TASK 3 \n");
+		led_on(LED_RED);
 	}
 }
 
@@ -111,6 +113,7 @@ void task4_handler(void)
 	while(1)
 	{
 		printf(" TASK 4 \n");
+		led_on(LED_ORANGE);
 	}
 }
 
