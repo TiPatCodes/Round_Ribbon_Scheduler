@@ -42,7 +42,7 @@ arm-none-eabi-objdump.exe  -h <name_of_elf_file>
         target remote localhost:3333
 
         - reset init 
-        -  flash write_image erase <elf file name>
+        - flash write_image erase <elf file name>
         - reset
         - halt
         - mdw : to read the memory in word length <address>  <count>
